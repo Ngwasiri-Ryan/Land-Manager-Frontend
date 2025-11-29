@@ -1,12 +1,12 @@
 import Link from 'next/link';
 import { 
-  MapPin, Phone, Globe, DownloadCloud, Image, AlertTriangle, 
+  MapPin, Phone,Image, AlertTriangle, 
   ChevronLeft, Share2, Heart, Star, Clock, Calendar, 
   Ruler, Eye, Users, Shield, CheckCircle, XCircle, TrendingUp,
   Building, Trees, Droplets, Zap, Wifi, Car, Bus, School, 
   Hospital, ShoppingCart, Plane, FileText, User, Mail, 
   MessageCircle, Navigation, Lightbulb, Wrench, Award, 
-  Target, ArrowRight, Home, Mountain, CloudRain, Sprout,
+  Target, Home, Mountain, CloudRain, Sprout,
   Leaf, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -186,7 +186,7 @@ async function getLand(id: string): Promise<Land> {
 function MediaGallery({ media }: { media: LandMedia[] }) {
   if (!media || media.length === 0) {
     return (
-      <div className="h-96 bg-gradient-to-br from-amber-50/50 to-emerald-50/50 flex flex-col items-center justify-center border-2 border-dashed border-amber-200 rounded-2xl">
+      <div className="h-96 bg-linear-to-br from-amber-50/50 to-emerald-50/50 flex flex-col items-center justify-center border-2 border-dashed border-amber-200 rounded-2xl">
         <Image className="h-16 w-16 text-amber-300 mb-4" />
         <div className="text-lg text-amber-600 font-medium">No photos available</div>
         <div className="text-sm text-amber-500 mt-2">Photos will appear here once uploaded</div>
@@ -206,7 +206,7 @@ function MediaGallery({ media }: { media: LandMedia[] }) {
           alt={primaryPhoto.original_name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-900/20 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-stone-900/20 to-transparent" />
         {primaryPhoto.is_primary && (
           <span className="absolute top-4 left-4 bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-full font-medium shadow-lg">
             <Star className="w-3 h-3 inline mr-1" />
@@ -311,13 +311,13 @@ export default async function LandDetailPage({ params }: PageProps) {
 
   if (!id) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/20 to-emerald-50/20 p-8">
+      <div className="min-h-screen bg-linear-to-br from-stone-50 via-amber-50/20 to-emerald-50/20 p-8">
         <div className="container mx-auto text-center">
           <AlertTriangle className="h-16 w-16 text-orange-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-orange-600 mb-4">Invalid Land ID</h1>
           <p className="text-stone-600 mb-6">The land ID is missing or invalid.</p>
           <Link href="/land">
-            <Button className="gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700">
+            <Button className="gap-2 bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700">
               <ChevronLeft className="w-4 h-4" />
               Back to Listings
             </Button>
@@ -340,7 +340,7 @@ export default async function LandDetailPage({ params }: PageProps) {
     const tagsArray = land.tags && typeof land.tags === 'string' ? land.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/20 to-emerald-50/20">
+      <div className="min-h-screen bg-linear-to-br from-stone-50 via-amber-50/20 to-emerald-50/20">
         {/* Animated Background */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-100/40 rounded-full blur-3xl animate-pulse" />
@@ -357,11 +357,11 @@ export default async function LandDetailPage({ params }: PageProps) {
                 <span className="font-medium">Back to Properties</span>
               </Link>
               <div className="flex items-center gap-3">
-                <Button variant="outline" size="sm" className="gap-2 border-stone-200/60 bg-white/60 text-stone-700">
+                <Button variant="outline" className="gap-2 border-stone-200/60 bg-white/60 text-stone-700">
                   <Share2 className="w-4 h-4" />
                   Share
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2 border-stone-200/60 bg-white/60 text-stone-700">
+                <Button variant="outline" className="gap-2 border-stone-200/60 bg-white/60 text-stone-700">
                   <Heart className="w-4 h-4" />
                   Save
                 </Button>
@@ -417,7 +417,7 @@ export default async function LandDetailPage({ params }: PageProps) {
                   </div>
 
                   {/* Price Section Integrated into Header */}
-                  <div className="flex items-center gap-6 mb-4 p-4 bg-gradient-to-r from-amber-50/50 to-emerald-50/50 rounded-xl border border-amber-200/50">
+                  <div className="flex items-center gap-6 mb-4 p-4 bg-linear-to-r from-amber-50/50 to-emerald-50/50 rounded-xl border border-amber-200/50">
                     <div>
                       <div className="text-2xl font-bold text-emerald-600">
                         {formatCurrency(land.price)}
@@ -669,7 +669,7 @@ export default async function LandDetailPage({ params }: PageProps) {
   <CardContent className="space-y-5">
     {/* Seller Avatar + Basic Info */}
     <div className="text-center">
-      <div className="relative w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-white font-semibold text-lg shadow-md ring-2 ring-emerald-100">
+      <div className="relative w-16 h-16 mx-auto mb-3 rounded-full bg-linear-to-br from-emerald-500 to-green-600 flex items-center justify-center text-white font-semibold text-lg shadow-md ring-2 ring-emerald-100">
         {land.seller_name?.[0]?.toUpperCase() ||
           land.seller_type?.[0]?.toUpperCase() ||
           "S"}
@@ -686,7 +686,7 @@ export default async function LandDetailPage({ params }: PageProps) {
           </span>
         )}
         {land.seller_company && (
-          <span className="text-xs text-stone-500 truncate max-w-[10rem]">
+          <span className="text-xs text-stone-500 truncate max-w-40">
             {land.seller_company}
           </span>
         )}
@@ -699,7 +699,7 @@ export default async function LandDetailPage({ params }: PageProps) {
       {land.seller_phone && (
         <Button
           className="w-full gap-2 py-3 text-white font-medium rounded-xl
-                     bg-gradient-to-r from-emerald-600 to-green-600 
+                     bg-linear-to-r from-emerald-600 to-green-600 
                      hover:from-emerald-700 hover:to-green-700 
                      shadow-sm hover:shadow transition-all"
         >
@@ -807,13 +807,13 @@ export default async function LandDetailPage({ params }: PageProps) {
     console.error('❌ Error rendering land page:', error);
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-50 via-amber-50/20 to-emerald-50/20 flex items-center justify-center p-8">
+      <div className="min-h-screen bg-linear-to-br from-stone-50 via-amber-50/20 to-emerald-50/20 flex items-center justify-center p-8">
         <div className="text-center">
           <AlertTriangle className="w-16 h-16 text-orange-400 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-stone-900 mb-2">Error Loading Property</h1>
           <p className="text-stone-600 mb-6">{error.message}</p>
           <Link href="/land">
-            <Button className="gap-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700">
+            <Button className="gap-2 bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700">
               <ChevronLeft className="w-4 h-4" />
               Back to Listings
             </Button>

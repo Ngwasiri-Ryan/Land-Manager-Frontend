@@ -3,13 +3,12 @@ import React from 'react';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Plus, MapPin, DollarSign, Search, Filter, Eye, Edit2, Trash2, Share2, 
-  Tag, Check, X, TrendingUp, FileText, Clock, Users, BarChart3, 
-  ChevronDown, MoreVertical, Home, Shield, Zap, Calendar,
-  ArrowUpDown, Download, Upload, Copy, MoreHorizontal
+  Plus, MapPin, DollarSign, Search, Filter, Eye, Edit2, 
+  Check, X, TrendingUp, FileText, Users, BarChart3, 
+  ChevronDown, Home, Shield,  Calendar, Copy, MoreHorizontal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -242,7 +241,7 @@ export default function LandPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-emerald-50/30 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your properties...</p>
@@ -252,17 +251,17 @@ export default function LandPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-emerald-50/30">
       {/* Enhanced Header */}
       <div className="border-b border-gray-200/60 bg-white/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-6 py-6">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl shadow-lg">
+              <div className="p-3 bg-linear-to-br from-emerald-500 to-green-600 rounded-2xl shadow-lg">
                 <Home className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-emerald-800 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold bg-linear-to-r from-gray-900 to-emerald-800 bg-clip-text text-transparent">
                   Land Portfolio
                 </h1>
                 <p className="text-gray-600 mt-1">
@@ -326,7 +325,7 @@ export default function LandPage() {
               
               <Link 
                 href="/land/new" 
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 hover:scale-105 transition-all duration-300 group"
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-linear-to-r from-emerald-600 to-green-600 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 hover:scale-105 transition-all duration-300 group"
               >
                 <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                 Add Property
@@ -532,8 +531,8 @@ export default function LandPage() {
                 key={land.id} 
                 className="border-0 shadow-lg bg-white/80 backdrop-blur-sm hover:shadow-2xl transition-all duration-500 group overflow-hidden cursor-pointer hover:translate-y-[-4px]"
               >
-                <div className="relative h-48 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
+                <div className="relative h-48 bg-linear-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center overflow-hidden">
+                  <div className="absolute inset-0 bg-linear-to-t from-black/5 to-transparent" />
                   <MapPin className="w-16 h-16 text-emerald-600/30 group-hover:scale-110 transition-transform duration-500" />
                   
                   {/* Status & Verification Badges */}
@@ -553,7 +552,7 @@ export default function LandPage() {
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <Button
                       variant="secondary"
-                      size="sm"
+                  
                       className="h-8 w-8 p-0 rounded-lg bg-white/90 backdrop-blur-sm shadow-lg"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -613,7 +612,7 @@ export default function LandPage() {
                       <Button
                         asChild
                         variant="outline"
-                        size="sm"
+                    
                         className="flex-1 gap-2 rounded-lg border-gray-300 hover:border-emerald-500 hover:bg-emerald-50 text-sm"
                       >
                         <Link href={`/land/${land.id}`}>
@@ -625,7 +624,7 @@ export default function LandPage() {
                       <Button
                         asChild
                         variant="outline"
-                        size="sm"
+                    
                         className="flex-1 gap-2 rounded-lg border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-sm"
                       >
                         <Link href={`/land/${land.id}/edit`}>
@@ -637,7 +636,7 @@ export default function LandPage() {
                       <Button
                         onClick={() => togglePublish(land.id)}
                         variant={land.status === 'Published' ? "outline" : "default"}
-                        size="sm"
+                    
                         className={cn(
                           "px-3 rounded-lg transition-all text-sm",
                           land.status === 'Published' 
@@ -663,7 +662,7 @@ export default function LandPage() {
               >
                 <CardContent className="p-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-16 h-16 bg-linear-to-br from-emerald-500/20 to-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
                       <MapPin className="w-6 h-6 text-emerald-600" />
                     </div>
                     
@@ -708,7 +707,7 @@ export default function LandPage() {
                       <Button
                         asChild
                         variant="ghost"
-                        size="sm"
+                    
                         className="h-8 w-8 p-0"
                       >
                         <Link href={`/land/${land.id}`}>
@@ -718,7 +717,7 @@ export default function LandPage() {
                       <Button
                         asChild
                         variant="ghost"
-                        size="sm"
+                    
                         className="h-8 w-8 p-0"
                       >
                         <Link href={`/land/${land.id}/edit`}>
@@ -728,7 +727,7 @@ export default function LandPage() {
                       <Button
                         onClick={() => togglePublish(land.id)}
                         variant="ghost"
-                        size="sm"
+                    
                         className="h-8 w-8 p-0"
                       >
                         {land.status === 'Published' ? <X className="w-4 h-4" /> : <Check className="w-4 h-4" />}
@@ -744,7 +743,7 @@ export default function LandPage() {
         {/* Enhanced Empty State */}
         {filtered.length === 0 && !loading && (
           <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center">
+            <div className="w-24 h-24 mx-auto mb-6 bg-linear-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center">
               <Home className="w-10 h-10 text-gray-400" />
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-2">No properties found</h3>
@@ -755,7 +754,7 @@ export default function LandPage() {
             </p>
             <Link 
               href="/land/new" 
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 hover:scale-105 transition-all duration-300"
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-linear-to-r from-emerald-600 to-green-600 text-white font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 hover:scale-105 transition-all duration-300"
             >
               <Plus className="w-5 h-5" />
               Add Your First Property
