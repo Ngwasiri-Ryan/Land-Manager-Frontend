@@ -262,7 +262,7 @@ export default function CreateLandPage() {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
 
- const handlePublish = async () => {
+  const handlePublish = async () => {
   setIsSubmitting(true);
   try {
     console.log('=== STARTING PUBLISH PROCESS ===');
@@ -332,40 +332,41 @@ export default function CreateLandPage() {
     const vegMap: Record<string, string> = { cleared: 'cleared', 'partially cleared': 'bush', 'densely vegetated': 'semi_bush', bush: 'bush' };
     const sellerMap: Record<string, string> = { agent: 'agent', owner: 'owner', company: 'company' };
 
-   const payload: any = {
-  title: formData.title,
-  description: formData.description,
-  price: Number(String(formData.price).replace(/[^0-9.-]+/g, '')) || 0,
-  is_negotiable: !!formData.negotiable,
-  size_value: Number(size.value) || 0,
-  size_unit: size.unit,
-  land_type: mapOption(formData.type, landTypeMap) || 'residential',
-  quarter: formData.quarter,
-  city: formData.city || 'Buea',
-  latitude: formData.latitude ? Number(formData.latitude) : null,
-  longitude: formData.longitude ? Number(formData.longitude) : null,
-  distance_from_main_road: formData.distanceToRoad,
-  landmarks: formData.landmarks,
-  topography: mapOption(formData.topography, topographyMap) || null,
-  flood_risk: mapOption(formData.floodRisk, floodMap) || null,
-  soil_type: mapOption(formData.soilType, soilMap) || null,
-  vegetation: mapOption(formData.vegetation, vegMap) || null,
-  document_type: mapOption(formData.documentType, docTypeMap) || 'other',
-  document_number: formData.documentNumber,
-  document_status: mapOption(formData.verificationStatus, verificationMap) || 'pending',
-  ownership_type: mapOption(formData.ownershipType, ownershipMap) || null,
-  is_disputed: !!formData.hasDisputes,
-  // Make dispute_details conditional
-  ...(formData.disputeDetails && formData.disputeDetails.trim() !== '' && { 
-    dispute_details: formData.disputeDetails 
-  }),
-  seller_type: mapOption(formData.sellerType, sellerMap) || 'agent',
-  seller_phone: formData.phone,
-  seller_whatsapp: formData.whatsapp,
-  road_access: null,
-  seller_name: '',
-  status: 'published'
-};
+    const payload: any = {
+      title: formData.title,
+      description: formData.description,
+      price: Number(String(formData.price).replace(/[^0-9.-]+/g, '')) || 0,
+      is_negotiable: !!formData.negotiable,
+      size_value: Number(size.value) || 0,
+      size_unit: size.unit,
+      land_type: mapOption(formData.type, landTypeMap) || 'residential',
+      quarter: formData.quarter,
+      city: formData.city || 'Buea',
+      latitude: formData.latitude ? Number(formData.latitude) : null,
+      longitude: formData.longitude ? Number(formData.longitude) : null,
+      distance_from_main_road: formData.distanceToRoad,
+      landmarks: formData.landmarks,
+      topography: mapOption(formData.topography, topographyMap) || null,
+      flood_risk: mapOption(formData.floodRisk, floodMap) || null,
+      soil_type: mapOption(formData.soilType, soilMap) || null,
+      vegetation: mapOption(formData.vegetation, vegMap) || null,
+      document_type: mapOption(formData.documentType, docTypeMap) || 'other',
+      document_number: formData.documentNumber,
+      document_status: mapOption(formData.verificationStatus, verificationMap) || 'pending',
+      ownership_type: mapOption(formData.ownershipType, ownershipMap) || null,
+      is_disputed: !!formData.hasDisputes,
+      // Make dispute_details conditional
+      ...(formData.disputeDetails && formData.disputeDetails.trim() !== '' && { 
+        dispute_details: formData.disputeDetails 
+      }),
+      seller_type: mapOption(formData.sellerType, sellerMap) || 'agent',
+      seller_phone: formData.phone,
+      seller_whatsapp: formData.whatsapp,
+      road_access: null,
+      seller_name: '',
+      status: 'published'
+    };
+
     console.log('Final payload being sent:', payload);
 
     // Validate required fields
@@ -376,32 +377,50 @@ export default function CreateLandPage() {
       throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
     }
 
-    console.log('Making API request to:', 'http://localhost:4000/api/land');
+    console.log('Making API request to create land...');
     
-    const resp = await fetch('http://localhost:4000/api/land', {
+    // STEP 1: Create the land record
+    const landResp = await fetch('http://localhost:4000/api/land', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
-    console.log('Response status:', resp.status);
-    console.log('Response ok:', resp.ok);
+    console.log('Land response status:', landResp.status);
+    console.log('Land response ok:', landResp.ok);
 
-    if (!resp.ok) {
-      const errorText = await resp.text();
-      console.error('Error response:', errorText);
+    if (!landResp.ok) {
+      const errorText = await landResp.text();
+      console.error('Land creation error response:', errorText);
       let errorData;
       try {
         errorData = JSON.parse(errorText);
       } catch {
         errorData = { error: errorText };
       }
-      throw new Error(errorData.error || `Failed to create land (status ${resp.status})`);
+      throw new Error(errorData.error || `Failed to create land (status ${landResp.status})`);
     }
 
-    const created = await resp.json();
-    console.log('Success! Created land:', created);
-    alert('Land listing published successfully! 🎉');
+    const createdLand = await landResp.json();
+    console.log('Success! Created land:', createdLand);
+
+    // STEP 2: Upload photos if any
+    if (formData.photos && formData.photos.length > 0) {
+      console.log(`Uploading ${formData.photos.length} photos...`);
+      await uploadMediaFiles(createdLand.id, formData.photos, 'photos');
+    } else {
+      console.log('No photos to upload');
+    }
+
+    // STEP 3: Upload video if any
+    if (formData.video) {
+      console.log('Uploading video...');
+      await uploadMediaFiles(createdLand.id, [formData.video], 'video');
+    } else {
+      console.log('No video to upload');
+    }
+
+    alert('Land listing published successfully! 🎉\nPhotos and documents have been uploaded.');
     
     // Reset form or redirect
     // window.location.href = '/lands'; // Uncomment to redirect
@@ -413,6 +432,48 @@ export default function CreateLandPage() {
     setIsSubmitting(false);
   }
 };
+
+// Helper function for file uploads
+const uploadMediaFiles = async (landId: string, files: File[], fileType: string) => {
+  try {
+    const formData = new FormData();
+    
+    // Append all files
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+
+    console.log(`Uploading ${files.length} ${fileType} for land ${landId}...`);
+
+    const uploadResp = await fetch(`http://localhost:4000/api/land/${landId}/media`, {
+      method: 'POST',
+      body: formData, // Let browser set Content-Type with boundary
+    });
+
+    console.log('Upload response status:', uploadResp.status);
+
+    if (!uploadResp.ok) {
+      const errorText = await uploadResp.text();
+      console.error(`Upload error for ${fileType}:`, errorText);
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText };
+      }
+      throw new Error(`Failed to upload ${fileType}: ${errorData.error || 'Unknown error'}`);
+    }
+
+    const result = await uploadResp.json();
+    console.log(`${fileType} upload successful:`, result);
+    return result;
+    
+  } catch (err) {
+    console.error(`Error uploading ${fileType}:`, err);
+    throw err; // Re-throw to handle in main function
+  }
+};
+
 
   // Get current step icon component
   const CurrentStepIcon = iconComponents[steps[currentStep].icon.name as keyof typeof iconComponents];
@@ -635,87 +696,49 @@ export default function CreateLandPage() {
     </div>
   );
 
-  // Step 5: Media - Fixed with proper file handling
-  const renderMedia = () => (
-    <div className="space-y-6 animate-in slide-in-from-right-10 duration-300">
-      <div>
-        <label className="flex text-sm font-semibold text-gray-900 mb-4 items-center gap-2">
-          <Camera className="h-5 w-5 text-green-600" />
-          Land Photos (4+ recommended)
-        </label>
-        
-        {/* Display uploaded photos */}
-        {formData.photos.length > 0 && (
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {formData.photos.map((photo, index) => (
-                <div key={index} className="relative">
-                  <img 
-                    src={URL.createObjectURL(photo)} 
-                    alt={`Preview ${index + 1}`}
-                    className="w-20 h-20 object-cover rounded-lg border"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removePhoto(index)}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <label className="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-green-400 transition-all duration-300 group cursor-pointer bg-white/50 backdrop-blur-sm hover:bg-green-50/50 block">
-          <Upload className="h-12 w-12 text-gray-400 mx-auto mb-3 group-hover:text-green-500 transition-colors" />
-          <p className="text-lg font-medium text-gray-700 mb-2">Upload Land Photos</p>
-          <p className="text-sm text-gray-500">Click to browse files</p>
-          <p className="text-xs text-gray-400 mt-2">PNG, JPG, WEBP up to 10MB each</p>
-          <input 
-            type="file" 
-            multiple 
-            accept="image/*" 
-            className="hidden" 
-            onChange={handlePhotoUpload}
-          />
-        </label>
-        {formData.photos.length > 0 && (
-          <p className="text-sm text-green-600 mt-2">
-            {formData.photos.length} photo(s) selected
+ // In your renderMedia function, show actual uploaded files
+const renderMedia = () => (
+  <div className="space-y-6">
+    <div>
+      <label className="flex text-sm font-semibold text-gray-900 mb-4 items-center gap-2">
+        <Camera className="h-5 w-5 text-green-600" />
+        Land Photos
+      </label>
+      
+      {/* Show selected files before upload */}
+      {formData.photos.length > 0 && (
+        <div className="mb-4">
+          <p className="text-sm text-green-600 mb-2">
+            {formData.photos.length} photo(s) ready for upload
           </p>
-        )}
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-4">
-          Video Walkthrough (Optional)
-        </label>
-        
-        {formData.video && (
-          <div className="mb-4">
-            <p className="text-sm text-green-600">
-              Video selected: {formData.video.name}
-            </p>
+          <div className="flex flex-wrap gap-2">
+            {formData.photos.map((photo, index) => (
+              <div key={index} className="relative">
+                <img 
+                  src={URL.createObjectURL(photo)} 
+                  alt={`Preview ${index + 1}`}
+                  className="w-20 h-20 object-cover rounded-lg border"
+                />
+                <span className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
+                  {photo.name}
+                </span>
+              </div>
+            ))}
           </div>
-        )}
-
-        <label className="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-green-400 transition-all duration-300 group cursor-pointer bg-white/50 backdrop-blur-sm hover:bg-green-50/50 block">
-          <Upload className="h-12 w-12 text-gray-400 mx-auto mb-3 group-hover:text-green-500 transition-colors" />
-          <p className="text-lg font-medium text-gray-700 mb-2">Upload Video</p>
-          <p className="text-sm text-gray-500">Show buyers around your property</p>
-          <p className="text-xs text-gray-400 mt-2">MP4, MOV up to 50MB</p>
-          <input 
-            type="file" 
-            accept="video/*" 
-            className="hidden" 
-            onChange={handleVideoUpload}
-          />
-        </label>
-      </div>
+        </div>
+      )}
+      
+      {/* Upload input */}
+      <input 
+        type="file" 
+        multiple 
+        accept="image/*" 
+        onChange={handlePhotoUpload}
+        className="w-full px-4 py-3 border border-gray-300 rounded-xl"
+      />
     </div>
-  );
+  </div>
+);
 
   // Step 6: Seller Info
   const renderSeller = () => (
