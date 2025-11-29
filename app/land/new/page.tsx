@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Stepper } from '@/components/ui/stepper';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, MapPin, FileText, Mountain, Users, Eye, CheckCircle, Camera, AlertTriangle, Star, Shield, Globe, Zap, Droplets, Trees } from 'lucide-react';
+import { Upload, MapPin, FileText, Mountain, Users, Eye, CheckCircle, Camera, AlertTriangle, Star, Shield, Globe, Zap, Droplets, Trees, Home, Wifi, Wrench, Building, CreditCard, Tag, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const steps = [
@@ -13,6 +13,7 @@ const steps = [
   { id: 'location', label: 'Location', description: 'Area, coordinates, landmarks', icon: MapPin },
   { id: 'legal', label: 'Legal Status', description: 'Documents, ownership, disputes', icon: Shield },
   { id: 'physical', label: 'Physical', description: 'Topography, soil, vegetation', icon: Mountain },
+  { id: 'utilities', label: 'Utilities & Features', description: 'Amenities and infrastructure', icon: Wifi },
   { id: 'media', label: 'Media', description: 'Photos & videos', icon: Camera },
   { id: 'seller', label: 'Seller Info', description: 'Contact, verification', icon: Users },
   { id: 'review', label: 'Review & Publish', description: 'Final check', icon: Eye },
@@ -24,6 +25,7 @@ const iconComponents = {
   MapPin,
   Shield,
   Mountain,
+  Wifi,
   Camera,
   Users,
   Eye
@@ -41,10 +43,18 @@ type LandFormData = {
   // Step 2: Location
   quarter: string;
   city: string;
+  region: string;
   latitude: string;
   longitude: string;
   distanceToRoad: string;
+  accessRoadWidth: string;
   landmarks: string;
+  exactLocation: string;
+  googleMapsUrl: string;
+  addressLine1: string;
+  addressLine2: string;
+  streetName: string;
+  neighborhood: string;
 
   // Step 3: Legal
   documentType: string;
@@ -53,22 +63,69 @@ type LandFormData = {
   ownershipType: string;
   hasDisputes: boolean;
   disputeDetails: string;
+  ownershipDuration: string;
+  previousOwner: string;
+  inheritanceProperty: boolean;
 
   // Step 4: Physical
   topography: string;
   floodRisk: string;
   soilType: string;
   vegetation: string;
+  elevation: string;
+  view: string;
+  zoningType: string;
+  developmentPotential: string;
 
-  // Step 5: Media
+  // Step 5: Utilities & Features
+  roadAccess: string;
+  publicTransportAccess: boolean;
+  nearestBusStopDistance: string;
+  electricityAvailable: boolean;
+  waterAvailable: boolean;
+  internetAvailable: boolean;
+  sewageSystem: boolean;
+  drainageSystem: boolean;
+  constructionAllowed: boolean;
+  buildingPlansApproved: boolean;
+  maxFloorsAllowed: string;
+  buildingCoveragePercentage: string;
+  features: string[];
+  allowedUses: string[];
+  restrictions: string;
+
+  // Step 6: Media
   photos: File[];
   video?: File;
 
-  // Step 6: Seller
+  // Step 7: Seller
   sellerType: string;
+  sellerName: string;
   phone: string;
   whatsapp: string;
+  sellerEmail: string;
+  sellerCompany: string;
+  agentName: string;
+  agentPhone: string;
+  agentEmail: string;
+  agencyName: string;
+  commissionRate: string;
   verified: boolean;
+
+  // Financial
+  pricePerSqm: string;
+  originalPrice: string;
+  priceReason: string;
+  paymentPlanAvailable: boolean;
+  paymentPlanDetails: string;
+  taxesIncluded: boolean;
+  annualPropertyTax: string;
+
+  // Marketing
+  featured: boolean;
+  premiumListing: boolean;
+  listingExpiryDate: string;
+  tags: string[];
 };
 
 
@@ -94,8 +151,6 @@ type LandFormData = {
       </div>
     </div>
   );
-
-  
 
   // Fixed SelectField Component
   const SelectField = ({ label, value, onChange, options, icon: Icon, required = false, ...props }: any) => (
@@ -167,39 +222,131 @@ type LandFormData = {
     </label>
   );
 
+  // MultiSelectField Component for features and tags
+  const MultiSelectField = ({ label, values, onChange, options, icon: Icon }: any) => (
+    <div className="group">
+      <label className="block text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        {Icon && <Icon className="h-4 w-4 text-green-600" />}
+        {label}
+      </label>
+      <div className="space-y-2">
+        {options.map((option: string) => (
+          <CheckboxField
+            key={option}
+            label={option}
+            checked={values.includes(option)}
+            onChange={(checked: boolean) => {
+              if (checked) {
+                onChange([...values, option]);
+              } else {
+                onChange(values.filter((v: string) => v !== option));
+              }
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
 
 export default function CreateLandPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<LandFormData>({
+    // Step 1: Basic
     title: '',
     size: '',
     type: 'Residential',
     price: '',
     negotiable: false,
     description: '',
+
+    // Step 2: Location
     quarter: '',
     city: 'Buea',
+    region: 'Southwest',
     latitude: '',
     longitude: '',
     distanceToRoad: '',
+    accessRoadWidth: '',
     landmarks: '',
+    exactLocation: '',
+    googleMapsUrl: '',
+    addressLine1: '',
+    addressLine2: '',
+    streetName: '',
+    neighborhood: '',
+
+    // Step 3: Legal
     documentType: 'Layout plan',
     documentNumber: '',
     verificationStatus: 'Pending',
     ownershipType: 'Individual',
     hasDisputes: false,
     disputeDetails: '',
+    ownershipDuration: '',
+    previousOwner: '',
+    inheritanceProperty: false,
+
+    // Step 4: Physical
     topography: 'Flat',
     floodRisk: 'Low',
     soilType: 'Volcanic',
     vegetation: 'Cleared',
+    elevation: '',
+    view: '',
+    zoningType: 'Residential',
+    developmentPotential: 'Medium',
+
+    // Step 5: Utilities & Features
+    roadAccess: 'gravel',
+    publicTransportAccess: false,
+    nearestBusStopDistance: '',
+    electricityAvailable: false,
+    waterAvailable: false,
+    internetAvailable: false,
+    sewageSystem: false,
+    drainageSystem: false,
+    constructionAllowed: true,
+    buildingPlansApproved: false,
+    maxFloorsAllowed: '2',
+    buildingCoveragePercentage: '60',
+    features: [],
+    allowedUses: [],
+    restrictions: '',
+
+    // Step 6: Media
     photos: [],
     video: undefined,
+
+    // Step 7: Seller
     sellerType: 'Agent',
+    sellerName: '',
     phone: '',
     whatsapp: '',
+    sellerEmail: '',
+    sellerCompany: '',
+    agentName: '',
+    agentPhone: '',
+    agentEmail: '',
+    agencyName: '',
+    commissionRate: '',
     verified: false,
+
+    // Financial
+    pricePerSqm: '',
+    originalPrice: '',
+    priceReason: '',
+    paymentPlanAvailable: false,
+    paymentPlanDetails: '',
+    taxesIncluded: false,
+    annualPropertyTax: '',
+
+    // Marketing
+    featured: false,
+    premiumListing: false,
+    listingExpiryDate: '',
+    tags: [],
   });
 
   // Fixed input change handler
@@ -295,7 +442,9 @@ export default function CreateLandPage() {
       commercial: 'commercial',
       'mixed-use': 'mixed',
       mixed: 'mixed',
-      agricultural: 'agricultural'
+      agricultural: 'agricultural',
+      industrial: 'industrial',
+      recreational: 'recreational'
     };
 
     const docTypeMap: Record<string, string> = {
@@ -303,13 +452,17 @@ export default function CreateLandPage() {
       'land certificate': 'land_certificate',
       'sales agreement': 'sales_agreement',
       attestation: 'attestation',
-      allocation: 'allocation'
+      allocation: 'allocation',
+      'gift deed': 'gift_deed',
+      inheritance: 'inheritance',
+      other: 'other'
     };
 
     const verificationMap: Record<string, string> = {
       verified: 'verified',
       pending: 'pending',
-      unverified: 'unverified'
+      unverified: 'unverified',
+      'in review': 'in_review'
     };
 
     const ownershipMap: Record<string, string> = {
@@ -318,21 +471,67 @@ export default function CreateLandPage() {
       'family': 'family',
       'community land': 'community',
       community: 'community',
-      company: 'company'
+      company: 'company',
+      government: 'government',
+      trust: 'trust'
     };
 
     const topographyMap: Record<string, string> = {
       flat: 'flat',
       'gently sloping': 'gentle_slope',
-      'steep': 'steep'
+      'steep': 'steep',
+      hilly: 'hilly',
+      mountainous: 'mountainous',
+      valley: 'valley'
     };
 
-    const floodMap: Record<string, string> = { low: 'low', medium: 'medium', high: 'high' };
-    const soilMap: Record<string, string> = { volcanic: 'volcanic', clay: 'clay', sandy: 'sand', mixed: 'mixed' };
-    const vegMap: Record<string, string> = { cleared: 'cleared', 'partially cleared': 'bush', 'densely vegetated': 'semi_bush', bush: 'bush' };
-    const sellerMap: Record<string, string> = { agent: 'agent', owner: 'owner', company: 'company' };
+    const floodMap: Record<string, string> = { 
+      low: 'low', 
+      medium: 'medium', 
+      high: 'high',
+      'very high': 'very_high'
+    };
+
+    const soilMap: Record<string, string> = { 
+      volcanic: 'volcanic', 
+      clay: 'clay', 
+      sandy: 'sandy', 
+      loamy: 'loamy',
+      rocky: 'rocky',
+      mixed: 'mixed',
+      laterite: 'laterite'
+    };
+
+    const vegMap: Record<string, string> = { 
+      cleared: 'cleared', 
+      'partially cleared': 'bush', 
+      'densely vegetated': 'semi_bush', 
+      bush: 'bush',
+      forested: 'forested',
+      farmland: 'farmland',
+      grassland: 'grassland'
+    };
+
+    const sellerMap: Record<string, string> = { 
+      agent: 'agent', 
+      owner: 'owner', 
+      company: 'company',
+      bank: 'bank',
+      government: 'government',
+      inheritance: 'inheritance'
+    };
+
+    const roadAccessMap: Record<string, string> = {
+      tarred: 'tarred',
+      gravel: 'gravel',
+      seasonal: 'seasonal',
+      none: 'none',
+      paved: 'paved',
+      unpaved: 'unpaved'
+    };
 
     const payload: any = {
+      // Basic Information
       title: formData.title,
       description: formData.description,
       price: Number(String(formData.price).replace(/[^0-9.-]+/g, '')) || 0,
@@ -340,37 +539,106 @@ export default function CreateLandPage() {
       size_value: Number(size.value) || 0,
       size_unit: size.unit,
       land_type: mapOption(formData.type, landTypeMap) || 'residential',
+
+      // Location Information
       quarter: formData.quarter,
       city: formData.city || 'Buea',
+      region: formData.region || null,
+      country: 'Cameroon',
       latitude: formData.latitude ? Number(formData.latitude) : null,
       longitude: formData.longitude ? Number(formData.longitude) : null,
+      exact_location: formData.exactLocation || null,
+      google_maps_url: formData.googleMapsUrl || null,
+      address_line_1: formData.addressLine1 || null,
+      address_line_2: formData.addressLine2 || null,
+      street_name: formData.streetName || null,
+      neighborhood: formData.neighborhood || null,
+
+      // Access & Infrastructure
+      road_access: mapOption(formData.roadAccess, roadAccessMap) || null,
       distance_from_main_road: formData.distanceToRoad,
+      access_road_width: formData.accessRoadWidth || null,
+      public_transport_access: !!formData.publicTransportAccess,
+      nearest_bus_stop_distance: formData.nearestBusStopDistance || null,
       landmarks: formData.landmarks,
+
+      // Physical Characteristics
       topography: mapOption(formData.topography, topographyMap) || null,
       flood_risk: mapOption(formData.floodRisk, floodMap) || null,
       soil_type: mapOption(formData.soilType, soilMap) || null,
       vegetation: mapOption(formData.vegetation, vegMap) || null,
+      elevation: formData.elevation || null,
+      view: formData.view || null,
+
+      // Zoning & Development
+      zoning_type: formData.zoningType || null,
+      development_potential: formData.developmentPotential || null,
+
+      // Utilities
+      electricity_available: !!formData.electricityAvailable,
+      water_available: !!formData.waterAvailable,
+      internet_available: !!formData.internetAvailable,
+      sewage_system: !!formData.sewageSystem,
+      drainage_system: !!formData.drainageSystem,
+
+      // Legal & Documentation
       document_type: mapOption(formData.documentType, docTypeMap) || 'other',
       document_number: formData.documentNumber,
       document_status: mapOption(formData.verificationStatus, verificationMap) || 'pending',
       ownership_type: mapOption(formData.ownershipType, ownershipMap) || null,
       is_disputed: !!formData.hasDisputes,
-      // Make dispute_details conditional
-      ...(formData.disputeDetails && formData.disputeDetails.trim() !== '' && { 
-        dispute_details: formData.disputeDetails 
-      }),
+      dispute_details: formData.disputeDetails || null,
+      ownership_duration: formData.ownershipDuration || null,
+      previous_owner: formData.previousOwner || null,
+      inheritance_property: !!formData.inheritanceProperty,
+
+      // Development Information
+      construction_allowed: !!formData.constructionAllowed,
+      building_plans_approved: !!formData.buildingPlansApproved,
+      max_floors_allowed: formData.maxFloorsAllowed ? parseInt(formData.maxFloorsAllowed) : null,
+      building_coverage_percentage: formData.buildingCoveragePercentage ? parseFloat(formData.buildingCoveragePercentage) : null,
+
+      // Features & Restrictions
+      features: formData.features.length > 0 ? formData.features : null,
+      allowed_uses: formData.allowedUses.length > 0 ? formData.allowedUses : null,
+      restrictions: formData.restrictions || null,
+
+      // Seller Information
       seller_type: mapOption(formData.sellerType, sellerMap) || 'agent',
+      seller_name: formData.sellerName || '',
       seller_phone: formData.phone,
       seller_whatsapp: formData.whatsapp,
-      road_access: null,
-      seller_name: '',
+      seller_email: formData.sellerEmail || null,
+      seller_company: formData.sellerCompany || null,
+      agent_name: formData.agentName || null,
+      agent_phone: formData.agentPhone || null,
+      agent_email: formData.agentEmail || null,
+      agency_name: formData.agencyName || null,
+      commission_rate: formData.commissionRate ? parseFloat(formData.commissionRate) : null,
+
+      // Financial Details
+      price_per_sqm: formData.pricePerSqm ? parseFloat(formData.pricePerSqm) : null,
+      original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
+      price_reason: formData.priceReason || null,
+      payment_plan_available: !!formData.paymentPlanAvailable,
+      payment_plan_details: formData.paymentPlanDetails || null,
+      taxes_included: !!formData.taxesIncluded,
+      annual_property_tax: formData.annualPropertyTax ? parseFloat(formData.annualPropertyTax) : null,
+
+      // Marketing
+      featured: !!formData.featured,
+      premium_listing: !!formData.premiumListing,
+      listing_expiry_date: formData.listingExpiryDate || null,
+      tags: formData.tags.length > 0 ? formData.tags : null,
+
+      // Status
       status: 'published'
     };
 
     console.log('Final payload being sent:', payload);
 
     // Validate required fields
-    const required = ['title', 'price', 'size_value', 'size_unit', 'land_type', 'quarter', 'seller_type'];
+    const required = ['title', 'price', 'size_value', 'size_unit', 'land_type', 'quarter', 'seller_type', 'seller_phone'];
     const missingFields = required.filter(field => !payload[field] && payload[field] !== 0);
     
     if (missingFields.length > 0) {
@@ -505,7 +773,7 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
           label="Land Type"
           value={formData.type}
           onChange={(v: string) => handleInputChange('type', v)}
-          options={['Residential', 'Commercial', 'Mixed-use', 'Agricultural']}
+          options={['Residential', 'Commercial', 'Mixed-use', 'Agricultural', 'Industrial', 'Recreational']}
           icon={MapPin}
           required
         />
@@ -519,6 +787,23 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
         />
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputField
+          label="Price per SQM"
+          placeholder="e.g., 10,000 XAF"
+          value={formData.pricePerSqm}
+          onChange={(v: string) => handleInputChange('pricePerSqm', v)}
+          icon={CreditCard}
+        />
+        <InputField
+          label="Original Price"
+          placeholder="e.g., 5,500,000 XAF"
+          value={formData.originalPrice}
+          onChange={(v: string) => handleInputChange('originalPrice', v)}
+          icon={CreditCard}
+        />
+      </div>
+
       <CheckboxField
         label="Price is negotiable"
         checked={formData.negotiable}
@@ -526,8 +811,17 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
       />
 
       <TextAreaField
-        label="Short Description"
-        placeholder="Brief overview of the land, unique features, and potential uses..."
+        label="Price Reason/Justification"
+        placeholder="Explain the pricing strategy, comparable sales, unique features that justify the price..."
+        value={formData.priceReason}
+        onChange={(v: string) => handleInputChange('priceReason', v)}
+        rows={3}
+        icon={FileText}
+      />
+
+      <TextAreaField
+        label="Property Description"
+        placeholder="Detailed overview of the land, unique features, potential uses, development opportunities..."
         value={formData.description}
         onChange={(v: string) => handleInputChange('description', v)}
         rows={4}
@@ -544,7 +838,7 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
           label="Quarter / Area"
           value={formData.quarter}
           onChange={(v: string) => handleInputChange('quarter', v)}
-          options={['-- Select quarter --', 'Molyko', 'Mile 16', 'Bokwango', 'Muea', 'Bonduma', 'Other']}
+          options={['-- Select quarter --', 'Molyko', 'Mile 16', 'Bokwango', 'Muea', 'Bonduma', 'Bova', 'Other']}
           icon={MapPin}
           required
         />
@@ -566,6 +860,23 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <InputField
+          label="Region"
+          placeholder="e.g., Southwest"
+          value={formData.region}
+          onChange={(v: string) => handleInputChange('region', v)}
+          icon={MapPin}
+        />
+        <InputField
+          label="Neighborhood"
+          placeholder="e.g., University Area"
+          value={formData.neighborhood}
+          onChange={(v: string) => handleInputChange('neighborhood', v)}
+          icon={MapPin}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputField
           label="Latitude"
           placeholder="e.g., 4.153"
           value={formData.latitude}
@@ -581,17 +892,68 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
         />
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputField
+          label="Exact Location"
+          placeholder="e.g., Behind Buea Town Green"
+          value={formData.exactLocation}
+          onChange={(v: string) => handleInputChange('exactLocation', v)}
+          icon={MapPin}
+        />
+        <InputField
+          label="Google Maps URL"
+          placeholder="https://maps.google.com/..."
+          value={formData.googleMapsUrl}
+          onChange={(v: string) => handleInputChange('googleMapsUrl', v)}
+          icon={MapPin}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputField
+          label="Address Line 1"
+          placeholder="Street address"
+          value={formData.addressLine1}
+          onChange={(v: string) => handleInputChange('addressLine1', v)}
+          icon={MapPin}
+        />
+        <InputField
+          label="Address Line 2"
+          placeholder="Additional address info"
+          value={formData.addressLine2}
+          onChange={(v: string) => handleInputChange('addressLine2', v)}
+          icon={MapPin}
+        />
+      </div>
+
       <InputField
-        label="Distance to Major Road"
-        placeholder="e.g., 100 m from main highway"
-        value={formData.distanceToRoad}
-        onChange={(v: string) => handleInputChange('distanceToRoad', v)}
+        label="Street Name"
+        placeholder="e.g., Molyko Main Street"
+        value={formData.streetName}
+        onChange={(v: string) => handleInputChange('streetName', v)}
         icon={MapPin}
       />
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputField
+          label="Distance to Major Road"
+          placeholder="e.g., 100 m from main highway"
+          value={formData.distanceToRoad}
+          onChange={(v: string) => handleInputChange('distanceToRoad', v)}
+          icon={MapPin}
+        />
+        <InputField
+          label="Access Road Width"
+          placeholder="e.g., 6 meters"
+          value={formData.accessRoadWidth}
+          onChange={(v: string) => handleInputChange('accessRoadWidth', v)}
+          icon={MapPin}
+        />
+      </div>
+
       <TextAreaField
         label="Nearby Landmarks"
-        placeholder="e.g., University of Buea (1.2 km), Molyko Market (800 m), Schools, Hospitals..."
+        placeholder="e.g., University of Buea (1.2 km), Molyko Market (800 m), Schools, Hospitals, Shopping centers..."
         value={formData.landmarks}
         onChange={(v: string) => handleInputChange('landmarks', v)}
         rows={3}
@@ -608,7 +970,7 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
           label="Document Type"
           value={formData.documentType}
           onChange={(v: string) => handleInputChange('documentType', v)}
-          options={['Layout plan', 'Land Certificate', 'Sales Agreement', 'Attestation', 'Allocation']}
+          options={['Layout plan', 'Land Certificate', 'Sales Agreement', 'Attestation', 'Allocation', 'Gift Deed', 'Inheritance', 'Other']}
           icon={Shield}
         />
         <InputField
@@ -625,35 +987,60 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
           label="Verification Status"
           value={formData.verificationStatus}
           onChange={(v: string) => handleInputChange('verificationStatus', v)}
-          options={['Verified', 'Pending', 'Unverified']}
+          options={['Verified', 'Pending', 'Unverified', 'In review']}
           icon={Shield}
         />
         <SelectField
           label="Ownership Type"
           value={formData.ownershipType}
           onChange={(v: string) => handleInputChange('ownershipType', v)}
-          options={['Individual', 'Family-held', 'Community land', 'Company']}
+          options={['Individual', 'Family-held', 'Community land', 'Company', 'Government', 'Trust']}
           icon={Users}
         />
       </div>
 
-      <CheckboxField
-        label="Any known disputes?"
-        checked={formData.hasDisputes}
-        onChange={(v: boolean) => handleInputChange('hasDisputes', v)}
-      />
-
-      {formData.hasDisputes && (
-        <TextAreaField
-          label="Dispute Details"
-          placeholder="Describe any disputes or legal issues with the property..."
-          value={formData.disputeDetails}
-          onChange={(v: string) => handleInputChange('disputeDetails', v)}
-          rows={4}
-          className="border-red-300 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50"
-          icon={AlertTriangle}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputField
+          label="Ownership Duration"
+          placeholder="e.g., 5 years"
+          value={formData.ownershipDuration}
+          onChange={(v: string) => handleInputChange('ownershipDuration', v)}
+          icon={Shield}
         />
-      )}
+        <InputField
+          label="Previous Owner"
+          placeholder="Name of previous owner"
+          value={formData.previousOwner}
+          onChange={(v: string) => handleInputChange('previousOwner', v)}
+          icon={Users}
+        />
+      </div>
+
+      <div className="space-y-4">
+        <CheckboxField
+          label="Any known disputes?"
+          checked={formData.hasDisputes}
+          onChange={(v: boolean) => handleInputChange('hasDisputes', v)}
+        />
+
+        <CheckboxField
+          label="Inheritance Property"
+          checked={formData.inheritanceProperty}
+          onChange={(v: boolean) => handleInputChange('inheritanceProperty', v)}
+        />
+
+        {formData.hasDisputes && (
+          <TextAreaField
+            label="Dispute Details"
+            placeholder="Describe any disputes or legal issues with the property, ongoing cases, resolutions..."
+            value={formData.disputeDetails}
+            onChange={(v: string) => handleInputChange('disputeDetails', v)}
+            rows={4}
+            className="border-red-300 focus:border-red-500 focus:ring-red-500/20 bg-red-50/50"
+            icon={AlertTriangle}
+          />
+        )}
+      </div>
     </div>
   );
 
@@ -665,14 +1052,14 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
           label="Topography"
           value={formData.topography}
           onChange={(v: string) => handleInputChange('topography', v)}
-          options={['Flat', 'Gently sloping', 'Steep']}
+          options={['Flat', 'Gently sloping', 'Steep', 'Hilly', 'Mountainous', 'Valley']}
           icon={Mountain}
         />
         <SelectField
           label="Flood Risk"
           value={formData.floodRisk}
           onChange={(v: string) => handleInputChange('floodRisk', v)}
-          options={['Low', 'Medium', 'High']}
+          options={['Low', 'Medium', 'High', 'Very High']}
           icon={Droplets}
         />
       </div>
@@ -682,65 +1069,276 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
           label="Soil Type"
           value={formData.soilType}
           onChange={(v: string) => handleInputChange('soilType', v)}
-          options={['Volcanic', 'Clay', 'Sandy', 'Mixed']}
+          options={['Volcanic', 'Clay', 'Sandy', 'Loamy', 'Rocky', 'Mixed', 'Laterite']}
           icon={Mountain}
         />
         <SelectField
           label="Vegetation"
           value={formData.vegetation}
           onChange={(v: string) => handleInputChange('vegetation', v)}
-          options={['Cleared', 'Partially cleared', 'Densely vegetated']}
+          options={['Cleared', 'Partially cleared', 'Densely vegetated', 'Bush', 'Forested', 'Farmland', 'Grassland']}
           icon={Trees}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputField
+          label="Elevation"
+          placeholder="e.g., 1000m above sea level"
+          value={formData.elevation}
+          onChange={(v: string) => handleInputChange('elevation', v)}
+          icon={Mountain}
+        />
+        <InputField
+          label="View"
+          placeholder="e.g., Mountain view, Ocean view, City view"
+          value={formData.view}
+          onChange={(v: string) => handleInputChange('view', v)}
+          icon={Mountain}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <SelectField
+          label="Zoning Type"
+          value={formData.zoningType}
+          onChange={(v: string) => handleInputChange('zoningType', v)}
+          options={['Residential', 'Commercial', 'Mixed-use', 'Agricultural', 'Industrial', 'Conservation']}
+          icon={Building}
+        />
+        <SelectField
+          label="Development Potential"
+          value={formData.developmentPotential}
+          onChange={(v: string) => handleInputChange('developmentPotential', v)}
+          options={['Low', 'Medium', 'High']}
+          icon={Building}
         />
       </div>
     </div>
   );
 
- // In your renderMedia function, show actual uploaded files
-const renderMedia = () => (
-  <div className="space-y-6">
-    <div>
-      <label className="flex text-sm font-semibold text-gray-900 mb-4 items-center gap-2">
-        <Camera className="h-5 w-5 text-green-600" />
-        Land Photos
-      </label>
-      
-      {/* Show selected files before upload */}
-      {formData.photos.length > 0 && (
-        <div className="mb-4">
-          <p className="text-sm text-green-600 mb-2">
-            {formData.photos.length} photo(s) ready for upload
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {formData.photos.map((photo, index) => (
-              <div key={index} className="relative">
-                <img 
-                  src={URL.createObjectURL(photo)} 
-                  alt={`Preview ${index + 1}`}
-                  className="w-20 h-20 object-cover rounded-lg border"
-                />
-                <span className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
-                  {photo.name}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      {/* Upload input */}
-      <input 
-        type="file" 
-        multiple 
-        accept="image/*" 
-        onChange={handlePhotoUpload}
-        className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-      />
-    </div>
-  </div>
-);
+  // Step 5: Utilities & Features
+  const renderUtilities = () => (
+    <div className="space-y-6 animate-in slide-in-from-right-10 duration-300">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <SelectField
+          label="Road Access"
+          value={formData.roadAccess}
+          onChange={(v: string) => handleInputChange('roadAccess', v)}
+          options={['Tarred', 'Gravel', 'Seasonal', 'None', 'Paved', 'Unpaved']}
+          icon={MapPin}
+        />
+        <InputField
+          label="Nearest Bus Stop Distance"
+          placeholder="e.g., 500 m"
+          value={formData.nearestBusStopDistance}
+          onChange={(v: string) => handleInputChange('nearestBusStopDistance', v)}
+          icon={MapPin}
+        />
+      </div>
 
-  // Step 6: Seller Info
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900">Utilities Available</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <CheckboxField
+            label="Public Transport Access"
+            checked={formData.publicTransportAccess}
+            onChange={(v: boolean) => handleInputChange('publicTransportAccess', v)}
+          />
+          <CheckboxField
+            label="Electricity Available"
+            checked={formData.electricityAvailable}
+            onChange={(v: boolean) => handleInputChange('electricityAvailable', v)}
+          />
+          <CheckboxField
+            label="Water Available"
+            checked={formData.waterAvailable}
+            onChange={(v: boolean) => handleInputChange('waterAvailable', v)}
+          />
+          <CheckboxField
+            label="Internet Available"
+            checked={formData.internetAvailable}
+            onChange={(v: boolean) => handleInputChange('internetAvailable', v)}
+          />
+          <CheckboxField
+            label="Sewage System"
+            checked={formData.sewageSystem}
+            onChange={(v: boolean) => handleInputChange('sewageSystem', v)}
+          />
+          <CheckboxField
+            label="Drainage System"
+            checked={formData.drainageSystem}
+            onChange={(v: boolean) => handleInputChange('drainageSystem', v)}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900">Development Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CheckboxField
+            label="Construction Allowed"
+            checked={formData.constructionAllowed}
+            onChange={(v: boolean) => handleInputChange('constructionAllowed', v)}
+          />
+          <CheckboxField
+            label="Building Plans Approved"
+            checked={formData.buildingPlansApproved}
+            onChange={(v: boolean) => handleInputChange('buildingPlansApproved', v)}
+          />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputField
+            label="Max Floors Allowed"
+            placeholder="e.g., 2"
+            value={formData.maxFloorsAllowed}
+            onChange={(v: string) => handleInputChange('maxFloorsAllowed', v)}
+            icon={Building}
+          />
+          <InputField
+            label="Building Coverage %"
+            placeholder="e.g., 60"
+            value={formData.buildingCoveragePercentage}
+            onChange={(v: string) => handleInputChange('buildingCoveragePercentage', v)}
+            icon={Building}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <MultiSelectField
+          label="Property Features"
+          values={formData.features}
+          onChange={(v: string[]) => handleInputChange('features', v)}
+          options={['Waterfront', 'Corner-lot', 'Fenced', 'Gated', 'Security', 'Parking', 'Garden', 'Pool']}
+          icon={Home}
+        />
+        <MultiSelectField
+          label="Allowed Uses"
+          values={formData.allowedUses}
+          onChange={(v: string[]) => handleInputChange('allowedUses', v)}
+          options={['Residential', 'Commercial', 'Farming', 'Industrial', 'Recreational', 'Mixed-use']}
+          icon={Wrench}
+        />
+      </div>
+
+      <TextAreaField
+        label="Building Restrictions"
+        placeholder="Any building restrictions, height limits, setback requirements, environmental restrictions..."
+        value={formData.restrictions}
+        onChange={(v: string) => handleInputChange('restrictions', v)}
+        rows={3}
+        icon={AlertTriangle}
+      />
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900">Financial Details</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CheckboxField
+            label="Payment Plan Available"
+            checked={formData.paymentPlanAvailable}
+            onChange={(v: boolean) => handleInputChange('paymentPlanAvailable', v)}
+          />
+          <CheckboxField
+            label="Taxes Included in Price"
+            checked={formData.taxesIncluded}
+            onChange={(v: boolean) => handleInputChange('taxesIncluded', v)}
+          />
+        </div>
+        {formData.paymentPlanAvailable && (
+          <TextAreaField
+            label="Payment Plan Details"
+            placeholder="Describe the payment plan terms, down payment, installment periods..."
+            value={formData.paymentPlanDetails}
+            onChange={(v: string) => handleInputChange('paymentPlanDetails', v)}
+            rows={3}
+            icon={CreditCard}
+          />
+        )}
+        <InputField
+          label="Annual Property Tax"
+          placeholder="e.g., 50,000 XAF"
+          value={formData.annualPropertyTax}
+          onChange={(v: string) => handleInputChange('annualPropertyTax', v)}
+          icon={CreditCard}
+        />
+      </div>
+    </div>
+  );
+
+  // Step 6: Media
+  const renderMedia = () => (
+    <div className="space-y-6">
+      <div>
+        <label className="flex text-sm font-semibold text-gray-900 mb-4 items-center gap-2">
+          <Camera className="h-5 w-5 text-green-600" />
+          Land Photos
+        </label>
+        
+        {/* Show selected files before upload */}
+        {formData.photos.length > 0 && (
+          <div className="mb-4">
+            <p className="text-sm text-green-600 mb-2">
+              {formData.photos.length} photo(s) ready for upload
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {formData.photos.map((photo, index) => (
+                <div key={index} className="relative">
+                  <img 
+                    src={URL.createObjectURL(photo)} 
+                    alt={`Preview ${index + 1}`}
+                    className="w-20 h-20 object-cover rounded-lg border"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(index)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                  <span className="absolute bottom-1 left-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
+                    {photo.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Upload input */}
+        <input 
+          type="file" 
+          multiple 
+          accept="image/*" 
+          onChange={handlePhotoUpload}
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-900 mb-4">
+          Video Walkthrough (Optional)
+        </label>
+        
+        {formData.video && (
+          <div className="mb-4">
+            <p className="text-sm text-green-600">
+              Video selected: {formData.video.name}
+            </p>
+          </div>
+        )}
+
+        <input 
+          type="file" 
+          accept="video/*" 
+          onChange={handleVideoUpload}
+          className="w-full px-4 py-3 border border-gray-300 rounded-xl"
+        />
+      </div>
+    </div>
+  );
+
+  // Step 7: Seller Info
   const renderSeller = () => (
     <div className="space-y-6 animate-in slide-in-from-right-10 duration-300">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -748,7 +1346,15 @@ const renderMedia = () => (
           label="Seller Type"
           value={formData.sellerType}
           onChange={(v: string) => handleInputChange('sellerType', v)}
-          options={['Agent', 'Owner', 'Company']}
+          options={['Agent', 'Owner', 'Company', 'Bank', 'Government', 'Inheritance']}
+          icon={Users}
+          required
+        />
+        <InputField
+          label="Seller Name"
+          placeholder="Full name or company name"
+          value={formData.sellerName}
+          onChange={(v: string) => handleInputChange('sellerName', v)}
           icon={Users}
         />
       </div>
@@ -761,6 +1367,7 @@ const renderMedia = () => (
           value={formData.phone}
           onChange={(v: string) => handleInputChange('phone', v)}
           icon={Zap}
+          required
         />
         <InputField
           label="WhatsApp"
@@ -772,15 +1379,108 @@ const renderMedia = () => (
         />
       </div>
 
-      <CheckboxField
-        label="I am a verified dealer"
-        checked={formData.verified}
-        onChange={(v: boolean) => handleInputChange('verified', v)}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputField
+          label="Email"
+          type="email"
+          placeholder="seller@example.com"
+          value={formData.sellerEmail}
+          onChange={(v: string) => handleInputChange('sellerEmail', v)}
+          icon={Zap}
+        />
+        <InputField
+          label="Company Name"
+          placeholder="Company name (if applicable)"
+          value={formData.sellerCompany}
+          onChange={(v: string) => handleInputChange('sellerCompany', v)}
+          icon={Building}
+        />
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900">Agent Information (If applicable)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputField
+            label="Agent Name"
+            placeholder="Agent's full name"
+            value={formData.agentName}
+            onChange={(v: string) => handleInputChange('agentName', v)}
+            icon={Users}
+          />
+          <InputField
+            label="Agent Phone"
+            placeholder="+237650000000"
+            value={formData.agentPhone}
+            onChange={(v: string) => handleInputChange('agentPhone', v)}
+            icon={Zap}
+          />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputField
+            label="Agent Email"
+            type="email"
+            placeholder="agent@example.com"
+            value={formData.agentEmail}
+            onChange={(v: string) => handleInputChange('agentEmail', v)}
+            icon={Zap}
+          />
+          <InputField
+            label="Agency Name"
+            placeholder="Real estate agency name"
+            value={formData.agencyName}
+            onChange={(v: string) => handleInputChange('agencyName', v)}
+            icon={Building}
+          />
+        </div>
+        <InputField
+          label="Commission Rate (%)"
+          placeholder="e.g., 3.5"
+          value={formData.commissionRate}
+          onChange={(v: string) => handleInputChange('commissionRate', v)}
+          icon={CreditCard}
+        />
+      </div>
+
+      <div className="space-y-4">
+        <CheckboxField
+          label="I am a verified dealer"
+          checked={formData.verified}
+          onChange={(v: boolean) => handleInputChange('verified', v)}
+        />
+        
+        <MultiSelectField
+          label="Listing Tags"
+          values={formData.tags}
+          onChange={(v: string[]) => handleInputChange('tags', v)}
+          options={['prime-location', 'waterfront', 'investment-opportunity', 'first-time-buyer', 'vip', 'quick-sale']}
+          icon={Tag}
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CheckboxField
+            label="Featured Listing"
+            checked={formData.featured}
+            onChange={(v: boolean) => handleInputChange('featured', v)}
+          />
+          <CheckboxField
+            label="Premium Listing"
+            checked={formData.premiumListing}
+            onChange={(v: boolean) => handleInputChange('premiumListing', v)}
+          />
+        </div>
+
+        <InputField
+          label="Listing Expiry Date"
+          type="date"
+          value={formData.listingExpiryDate}
+          onChange={(v: string) => handleInputChange('listingExpiryDate', v)}
+          icon={Calendar}
+        />
+      </div>
     </div>
   );
 
-  // Step 7: Review
+  // Step 8: Review
   const renderReview = () => (
     <div className="space-y-6 animate-in slide-in-from-right-10 duration-300">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -852,6 +1552,7 @@ const renderMedia = () => (
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="flex justify-between py-2 border-b border-gray-100"><strong>Type:</strong> <span className="text-gray-700">{formData.sellerType}</span></div>
+          <div className="flex justify-between py-2 border-b border-gray-100"><strong>Name:</strong> <span className="text-gray-700">{formData.sellerName || '—'}</span></div>
           <div className="flex justify-between py-2 border-b border-gray-100"><strong>Phone:</strong> <span className="text-gray-700">{formData.phone || '—'}</span></div>
           <div className="flex justify-between py-2 border-b border-gray-100"><strong>WhatsApp:</strong> <span className="text-gray-700">{formData.whatsapp || '—'}</span></div>
           <div className="flex justify-between py-2"><strong>Verified:</strong> <span className={formData.verified ? "text-green-600 font-semibold" : "text-gray-700"}>{formData.verified ? '✓ Yes' : 'No'}</span></div>
@@ -926,9 +1627,10 @@ const renderMedia = () => (
             {currentStep === 1 && renderLocation()}
             {currentStep === 2 && renderLegal()}
             {currentStep === 3 && renderPhysical()}
-            {currentStep === 4 && renderMedia()}
-            {currentStep === 5 && renderSeller()}
-            {currentStep === 6 && renderReview()}
+            {currentStep === 4 && renderUtilities()}
+            {currentStep === 5 && renderMedia()}
+            {currentStep === 6 && renderSeller()}
+            {currentStep === 7 && renderReview()}
           </CardContent>
         </Card>
 
