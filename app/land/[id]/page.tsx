@@ -813,8 +813,8 @@ export default async function LandDetailPage({ params }: PageProps) {
           <h1 className="text-2xl font-bold text-stone-900 mb-2">Error Loading Property</h1>
           <p className="text-stone-600 mb-6">{error.message}</p>
           <Link href="/land">
-            <Button className="gap-2 bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700">
-              <ChevronLeft className="w-4 h-4" />
+            <Button className="gap-2 bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 p-2">
+              <ChevronLeft className="w-4 h-4 text-white" />
               Back to Listings
             </Button>
           </Link>

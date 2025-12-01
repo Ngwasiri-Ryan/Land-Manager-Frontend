@@ -5,10 +5,13 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Dialog } from '@/components/ui/dialog'; // Import the Dialog component
+import { useNotify } from '@/components/ui/notify'
 import { 
   Plus, MapPin, DollarSign, Search, Filter, Eye, Edit2, 
   Check, X, TrendingUp, FileText, Users, BarChart3, 
-  ChevronDown, Home, Shield,  Calendar, Copy, MoreHorizontal
+  ChevronDown, Home, Shield,  Calendar, Copy, MoreHorizontal,
+  Trash2 // Import Trash2 icon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -42,6 +45,13 @@ export default function LandPage() {
 
   const [lands, setLands] = useState<Land[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Dialog states
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [landToDelete, setLandToDelete] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const notify = useNotify()
 
   // Fetch lands from backend
   React.useEffect(() => {
@@ -110,6 +120,45 @@ export default function LandPage() {
     });
   }, [lands, query, quarterFilter, statusFilter, docFilter, minPrice, maxPrice]);
 
+  // Delete land function
+const removeLand = async (id: string) => {
+  setDeleteLoading(true);
+  try {
+    const res = await fetch(`http://localhost:4000/api/land/${id}`, { method: 'DELETE' });
+    if (res.status !== 204 && !res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Failed to delete (${res.status})`);
+    }
+    setLands(prev => prev.filter(l => l.id !== id));
+    setDialogOpen(false);
+    setLandToDelete(null);
+    
+    // Show success notification
+    notify.success('Property deleted successfully!');
+    
+  } catch (err) {
+    console.error(err);
+    
+    // Show error notification instead of alert
+   notify.error('Failed to delete property', {
+        caption: 'Please try again later'
+      });
+  } finally {
+    setDeleteLoading(false);
+  }
+};
+
+// Open delete confirmation dialog
+const openDeleteDialog = (id: string) => {
+  setLandToDelete(id);
+  setDialogOpen(true);
+};
+
+// Close dialog
+const closeDialog = () => {
+  setDialogOpen(false);
+  setLandToDelete(null);
+};
   // Quick actions
   const togglePublish = async (id: string) => {
     try {
@@ -151,21 +200,6 @@ export default function LandPage() {
     } catch (err) {
       console.error(err);
       alert('Failed to update verification status');
-    }
-  };
-
-  const removeLand = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) return;
-    try {
-      const res = await fetch(`http://localhost:4000/api/land/${id}`, { method: 'DELETE' });
-      if (res.status !== 204 && !res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `Failed to delete (${res.status})`);
-      }
-      setLands(prev => prev.filter(l => l.id !== id));
-    } catch (err) {
-      console.error(err);
-      alert('Failed to delete listing');
     }
   };
 
@@ -252,6 +286,19 @@ export default function LandPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-emerald-50/30">
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        isOpen={dialogOpen}
+        onClose={closeDialog}
+        onConfirm={() => landToDelete && removeLand(landToDelete)}
+        title="Delete Property"
+        description="Are you sure you want to delete this property? This action cannot be undone and all associated data will be permanently removed."
+        type="delete"
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+        isLoading={deleteLoading}
+      />
+
       {/* Enhanced Header */}
       <div className="border-b border-gray-200/60 bg-white/80 backdrop-blur-sm sticky top-0 z-40">
         <div className="container mx-auto px-6 py-6">
@@ -549,10 +596,9 @@ export default function LandPage() {
                   </div>
 
                   {/* Quick Actions */}
-                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <Button
                       variant="secondary"
-                  
                       className="h-8 w-8 p-0 rounded-lg bg-white/90 backdrop-blur-sm shadow-lg"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -560,6 +606,16 @@ export default function LandPage() {
                       }}
                     >
                       <Copy className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="h-8 w-8 p-0 rounded-lg bg-white/90 backdrop-blur-sm shadow-lg hover:bg-red-50 hover:text-red-600"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDeleteDialog(land.id);
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                   </div>
                 </div>
@@ -612,7 +668,6 @@ export default function LandPage() {
                       <Button
                         asChild
                         variant="outline"
-                    
                         className="flex-1 gap-2 rounded-lg border-gray-300 hover:border-emerald-500 hover:bg-emerald-50 text-sm"
                       >
                         <Link href={`/land/${land.id}`}>
@@ -624,7 +679,6 @@ export default function LandPage() {
                       <Button
                         asChild
                         variant="outline"
-                    
                         className="flex-1 gap-2 rounded-lg border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-sm"
                       >
                         <Link href={`/land/${land.id}/edit`}>
@@ -636,7 +690,6 @@ export default function LandPage() {
                       <Button
                         onClick={() => togglePublish(land.id)}
                         variant={land.status === 'Published' ? "outline" : "default"}
-                    
                         className={cn(
                           "px-3 rounded-lg transition-all text-sm",
                           land.status === 'Published' 
@@ -707,7 +760,6 @@ export default function LandPage() {
                       <Button
                         asChild
                         variant="ghost"
-                    
                         className="h-8 w-8 p-0"
                       >
                         <Link href={`/land/${land.id}`}>
@@ -717,7 +769,6 @@ export default function LandPage() {
                       <Button
                         asChild
                         variant="ghost"
-                    
                         className="h-8 w-8 p-0"
                       >
                         <Link href={`/land/${land.id}/edit`}>
@@ -727,10 +778,16 @@ export default function LandPage() {
                       <Button
                         onClick={() => togglePublish(land.id)}
                         variant="ghost"
-                    
                         className="h-8 w-8 p-0"
                       >
                         {land.status === 'Published' ? <X className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                      </Button>
+                      <Button
+                        onClick={() => openDeleteDialog(land.id)}
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
