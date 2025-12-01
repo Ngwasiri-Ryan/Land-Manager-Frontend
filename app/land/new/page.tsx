@@ -1307,12 +1307,12 @@ const uploadMediaFiles = async (landId: string, files: File[], fileType: string)
         
         {/* Upload input */}
         <input 
-          type="file" 
-          multiple 
-          accept="image/*" 
-          onChange={handlePhotoUpload}
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-        />
+  type="file" 
+  multiple 
+  accept="image/*" 
+  onChange={handlePhotoUpload}
+  className="w-full px-4 py-3 border-2 border-green-300 rounded-xl focus:outline-none focus:ring-3 focus:ring-green-500/30 focus:border-green-500 transition-all duration-300 bg-white/80 backdrop-blur-sm cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gradient-to-r file:from-green-500 file:to-emerald-600 file:text-white hover:file:from-green-600 hover:file:to-emerald-700 file:transition-all file:duration-300 file:cursor-pointer"
+/>
       </div>
 
       <div>

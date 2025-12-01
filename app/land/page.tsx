@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent} from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Dialog } from '@/components/ui/dialog'; // Import the Dialog component
 import { useNotify } from '@/components/ui/notify'
@@ -52,6 +53,7 @@ export default function LandPage() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const notify = useNotify()
+  const router = useRouter();
 
   // Fetch lands from backend
   React.useEffect(() => {
@@ -135,6 +137,8 @@ const removeLand = async (id: string) => {
     
     // Show success notification
     notify.success('Property deleted successfully!');
+     router.push(`/land`);
+    router.refresh();
     
   } catch (err) {
     console.error(err);
